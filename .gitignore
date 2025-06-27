@@ -1,0 +1,11 @@
+# Terraform state files
+Terraform/terraform.tfstate
+Terraform/terraform.tfstate.backup
+*.tfstate
+*.tfstate.backup
+
+# Local Terraform directories
+.terraform/
+venv
+# Python virtual environment
+.env
