@@ -1,8 +1,42 @@
 terraform {
+  # MEJORA: Especificar versión mínima de Terraform
+  required_version = ">= 1.0"
+  
+  # MEJORA: Versionar providers
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 4.0"
+    }
+  }
+  
   backend "gcs" {
     bucket = "data-project3-terraform-state"
     prefix = "terraform/state"    
+    # MEJORA: Añadir encryption = true para el state
   }
+}
+
+# MEJORA 2: Añadir configuración de providers
+provider "aws" {
+  region = var.aws_region
+  # MEJORA: Configurar default tags para todos los recursos
+  default_tags {
+    tags = {
+      Project     = "data-project-3"
+      Environment = "dev"
+      ManagedBy   = "terraform"
+    }
+  }
+}
+
+provider "google" {
+  project = var.gcp_project_id
+  region  = var.gcp_region
 }
 
 module "ArtifactRegistry" {
@@ -24,6 +58,7 @@ module "VPC-LAMBDA-RDS" {
   datastream_password = var.datastream_password
   rds_endpoint = var.rds_endpoint
   
+  # MEJORA 3: Añadir depends_on explícito si es necesario
 }
 
 module "DataStream" {
@@ -35,4 +70,19 @@ module "DataStream" {
   replication_slot = var.replication_slot
   publication = var.publication
   destination_connection_profile_id = var.destination_connection_profile_id
+  
+  # MEJORA 4: El DataStream debería depender del módulo VPC-LAMBDA-RDS
+  depends_on = [module.VPC-LAMBDA-RDS]
+}
+
+# MEJORA 5: Añadir outputs importantes para referencia
+output "vpc_lambda_rds_outputs" {
+  description = "Outputs from VPC-LAMBDA-RDS module"
+  value       = module.VPC-LAMBDA-RDS
+  sensitive   = true
+}
+
+output "datastream_outputs" {
+  description = "Outputs from DataStream module"
+  value       = module.DataStream
 }
